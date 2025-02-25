@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Contact App</title>
+</head>
+<body>
+    <h2>Deaf Person: Start a Session</h2>
+    <form action="/create_session" method="post">
+        <button type="submit">Generate Code</button>
+    </form>
+
+    <h2>Contacted Person: Join a Session</h2>
+    <form action="/join" method="post">
+        <input type="text" name="code" placeholder="Enter Code" required>
+        <button type="submit">Join</button>
+    </form>
+</body>
+</html>

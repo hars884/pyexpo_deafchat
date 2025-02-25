@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Waiting Room</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.0/socket.io.js"></script>
+</head>
+<body>
+    <h2>Waiting for someone to join...</h2>
+    <p>Share this code: <strong>{{ code }}</strong></p>
+
+    <script>
+        var socket = io();
+        var code = "{{ code }}";
+
+        socket.emit("join", {"code": code});
+
+        socket.on("redirect_to_chat", function(data) {
+            window.location.href = "/chat/" + data.code;
+        });
+    </script>
+</body>
+</html>

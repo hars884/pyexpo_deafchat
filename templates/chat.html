@@ -1,0 +1,66 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Room</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.0/socket.io.js"></script>
+</head>
+<body>
+    <h2>Chat Room: {{ code }}</h2>
+    <ul id="messages"></ul>
+    <input id="message" type="text" placeholder="Type a message">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        var socket = io();
+        var code = "{{ code }}";
+
+        socket.emit("join", {"code": code});
+
+        socket.on("message", function(data) {
+            var messages = document.getElementById("messages");
+            var li = document.createElement("li");
+            li.textContent = data;
+            messages.appendChild(li);
+        });
+
+        function sendMessage() {
+            var message = document.getElementById("message").value;
+            socket.emit("message", {"code": code, "message": message});
+            document.getElementById("message").value = "";
+        }
+    </script>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Room</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.0/socket.io.js"></script>
+</head>
+<body>
+    <h2>Chat Room: {{ code }}</h2>
+    <ul id="messages"></ul>
+    <input id="message" type="text" placeholder="Type a message">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        var socket = io();
+        var code = "{{ code }}";
+
+        socket.emit("join", {"code": code});
+
+        socket.on("message", function(data) {
+            var messages = document.getElementById("messages");
+            var li = document.createElement("li");
+            li.textContent = data;
+            messages.appendChild(li);
+        });
+
+        function sendMessage() {
+            var message = document.getElementById("message").value;
+            socket.emit("message", {"code": code, "message": message});
+            document.getElementById("message").value = "";
+        }
+    </script>
+</body>
+</html>
