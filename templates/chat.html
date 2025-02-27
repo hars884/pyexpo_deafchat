@@ -1,66 +1,131 @@
-<!-- <!DOCTYPE html>
-<html>
-<head>
-    <title>Chat Room</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.0/socket.io.js"></script>
-</head>
-<body>
-    <h2>Chat Room: {{ code }}</h2>
-    <ul id="messages"></ul>
-    <input id="message" type="text" placeholder="Type a message">
-    <button onclick="sendMessage()">Send</button>
-
-    <script>
-        var socket = io();
-        var code = "{{ code }}";
-
-        socket.emit("join", {"code": code});
-
-        socket.on("message", function(data) {
-            var messages = document.getElementById("messages");
-            var li = document.createElement("li");
-            li.textContent = data;
-            messages.appendChild(li);
-        });
-
-        function sendMessage() {
-            var message = document.getElementById("message").value;
-            socket.emit("message", {"code": code, "message": message});
-            document.getElementById("message").value = "";
-        }
-    </script>
-</body>
-</html> -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Chat Room</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.0/socket.io.js"></script>
+    <meta charset="UTF-8">
+    <title>Chat Room: {{ code }}</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 </head>
 <body>
     <h2>Chat Room: {{ code }}</h2>
-    <ul id="messages"></ul>
-    <input id="message" type="text" placeholder="Type a message">
-    <button onclick="sendMessage()">Send</button>
+    <p>Your Input Method: <strong>{{ user_input }}</strong></p>
+    <p>Your Output Method: <strong>{{ user_output }}</strong></p>
+
+    <div id="messages"></div>
+
+    <!-- Text Input -->
+    <div id="textInput" {% if user_input == 'text' %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+        <input type="text" id="message" placeholder="Type your message...">
+        <button onclick="sendTextMessage()">Send</button>
+    </div>
+
+    <!-- Voice Input -->
+    <div id="voiceInput" {% if user_input == 'voice' %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+        <button id="record" style="padding: 10px; font-size: 16px;">🎤 Start Recording</button>
+        <audio id="audioPlayback" controls style="display: none;"></audio>
+        <p id="recordingStatus" style="color: red; display: none;">Recording...</p>
+
+    </div>
 
     <script>
-        var socket = io();
-        var code = "{{ code }}";
+        var socket = io.connect(window.location.origin);
+        socket.emit("join", {"code": "{{ code }}"});
 
-        socket.emit("join", {"code": code});
-
-        socket.on("message", function(data) {
-            var messages = document.getElementById("messages");
-            var li = document.createElement("li");
-            li.textContent = data;
-            messages.appendChild(li);
-        });
-
-        function sendMessage() {
+        // TEXT MESSAGE HANDLING
+        function sendTextMessage() {
             var message = document.getElementById("message").value;
-            socket.emit("message", {"code": code, "message": message});
-            document.getElementById("message").value = "";
+            socket.emit("message", {"code": "{{ code }}", "message": message, "type": "text"});
+            document.getElementById("message").value = ""; // Clear input field
         }
+
+        // VOICE RECORDING HANDLING
+        let mediaRecorder;
+    let audioChunks = [];
+    let isRecording = false;
+
+    const recordButton = document.getElementById("record");
+    const audioPlayback = document.getElementById("audioPlayback");
+    const recordingStatus = document.getElementById("recordingStatus");
+
+    recordButton.addEventListener("click", async () => {
+        if (!isRecording) {
+            try {
+                let stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = event => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    let audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+                    let reader = new FileReader();
+
+                    reader.readAsDataURL(audioBlob);
+                    reader.onloadend = function () {
+                        let base64Audio = reader.result.split(",")[1]; // Extract base64 data
+
+                        // Send to backend
+                        socket.emit("message", {
+                            "code": "{{ code }}",
+                            "message": base64Audio,
+                            "type": "audio"
+                        });
+
+                        // Show audio playback
+                        let audioUrl = URL.createObjectURL(audioBlob);
+                        audioPlayback.src = audioUrl;
+                        audioPlayback.style.display = "block";
+                    };
+                };
+
+                // Start recording
+                mediaRecorder.start();
+                isRecording = true;
+                recordButton.innerText = "⏹ Stop Recording";
+                recordButton.style.backgroundColor = "red"; // Change button color
+                recordButton.style.color = "white";
+                recordingStatus.style.display = "block"; // Show "Recording..." text
+            } catch (err) {
+                alert("Microphone access denied! Please allow it.");
+            }
+        } else {
+            // Stop recording
+            mediaRecorder.stop();
+            isRecording = false;
+            setTimeout(() => {
+                recordButton.innerText = "🎤 Start Recording";
+                recordButton.style.backgroundColor = "";
+                recordButton.style.color = "";
+            }, 500);  // Small delay to ensure UI update
+
+            recordingStatus.style.display = "none"; // Hide "Recording..." text
+        }
+    });
+
+        // MESSAGE HANDLING
+        socket.on("message", function (data) {
+        var msg = document.createElement("p");
+
+        if (data.type === "audio") {
+            let audioElement = document.createElement("audio");
+            audioElement.controls = true;
+            audioElement.src = data.message;
+            msg.appendChild(audioElement);
+
+            // If backend provides text conversion, show the text too
+            if (data.text) {
+                let textMsg = document.createElement("p");
+                textMsg.innerHTML = `<strong>Converted Text:</strong> ${data.text}`;
+                msg.appendChild(textMsg);
+            }
+        } else {
+            msg.innerHTML = `<strong>User:</strong> ${data.message}`;
+        }
+
+        document.getElementById("messages").appendChild(msg);
+    });
+
     </script>
 </body>
 </html>

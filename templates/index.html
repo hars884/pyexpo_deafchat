@@ -1,17 +1,48 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat App</title>
 </head>
 <body>
-    <h2>Welcome to the Chat App</h2>
+    <h1>Welcome to the Chat App</h1>
+    
+    <h2>Create a Chat Room</h2>
     <form action="/create_chat" method="post">
-        <button type="submit">Make a Chat</button>
+        <label for="input_methodc">Choose Input:</label>
+        <select name="input_methodc" id="input_methodc">
+            <option value="text">Text</option>
+            <option value="voice">Voice</option>
+        </select>
+
+        <label for="output_methodc">Choose Output:</label>
+        <select name="output_methodc" id="output_methodc">
+            <option value="text">Text</option>
+            <option value="voice">Voice</option>
+        </select>
+
+        <button type="submit">Create Chat</button>
     </form>
-    <br>
+
+    <h2>Join a Chat Room</h2>
     <form action="/join_chat" method="post">
-        <input type="text" name="code" placeholder="Enter Code" required>
-        <button type="submit">Join</button>
+        <label for="code">Enter Room Code:</label>
+        <input type="text" id="code" name="code" required>
+
+        <label for="input_methodj">Choose Input:</label>
+        <select name="input_methodj">
+            <option value="text">Text</option>
+            <option value="voice">Voice</option>
+        </select>
+
+        <label for="output_methodj">Choose Output:</label>
+        <select name="output_methodj">
+            <option value="text">Text</option>
+            <option value="voice">Voice</option>
+        </select>
+
+        <button type="submit">Join Chat</button>
     </form>
 </body>
 </html>

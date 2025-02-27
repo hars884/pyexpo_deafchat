@@ -1,22 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Waiting Room</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.0/socket.io.js"></script>
 </head>
 <body>
-    <h2>Waiting for someone to join...</h2>
-    <p>Share this code: <strong>{{ code }}</strong></p>
+    <h1>Waiting for another user to join...</h1>
+    <p>Share this code with your friend: <strong>{{ code }}</strong></p>
 
     <script>
-        var socket = io();
-        var code = "{{ code }}";
+        function checkIfUserJoined() {
+            fetch('/check_user_joined/{{ code }}')
+            .then(response => response.json())
+            .then(data => {
+                if (data.joined) {
+                    window.location.href = "/chat/{{ code }}";  // Redirect to chat room
+                }
+            })
+            .catch(error => console.error("Error checking user status:", error));
+        }
 
-        socket.emit("join", {"code": code});
-
-        socket.on("redirect_to_chat", function(data) {
-            window.location.href = "/chat/" + data.code;
-        });
+        setInterval(checkIfUserJoined, 2000); // Check every 2 seconds
     </script>
 </body>
 </html>
